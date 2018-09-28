@@ -1,10 +1,14 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torchvision
+import matplotlib.pyplot as plt
+import numpy as np
 
-class Net(nn.Module):
+class SoftmaxClassifier(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
+        super(SoftmaxClassifier, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -22,13 +26,13 @@ class Net(nn.Module):
         return x
 
 
-def set_optimizatiom(model):
+def set_optimization(model):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    epochs = 20
+    epochs = 2
     return criterion, optimizer, epochs
 
-def train(model, trainloader, criterion, optimizer, epochs):
+def train(model, trainloader, criterion, optimizer, epoch):
     for epoch in range(epochs):  
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
@@ -53,15 +57,15 @@ def train(model, trainloader, criterion, optimizer, epochs):
 
     print('Finished Training')
 
-    def test(model, testloader):
-        correct, total = 0, 0
-        with torch.no_grad():
-            for data in testloader:
-                images, labels = data
-                outputs = model(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+def test(model, testloader, epoch):
+    correct, total = 0, 0
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
 
-        print('Accuracy of the network on the 10000 test images: %d %%' % (
-              100 * correct / total))
+    print('Accuracy of the network on the 10000 test images: %d %%' % (
+            100 * correct / total))

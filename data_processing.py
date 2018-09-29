@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # which is the format for passing images into torchvision
 
 def chained_transform():
-    preprocess = transforms.Compose([transforms.Resize(32, 32),
+    preprocess = transforms.Compose([transforms.Resize((32, 32)),
                                      transforms.ToTensor(),
                                      transforms.Normalize((0.5, 0.5, 0.5), 
                                      (0.5, 0.5, 0.5))])
@@ -28,8 +28,6 @@ def load_test_image(image):
     preprocess = chained_transform()
     image = Image.open(image)
     img_tensor = preprocess(image)
-    print(img_tensor)
-    print(img_tensor.shape)
     return img_tensor
 
 def batch_data(trainset, testset, batch_size=4):

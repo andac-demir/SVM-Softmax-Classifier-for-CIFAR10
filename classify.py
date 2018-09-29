@@ -107,7 +107,7 @@ def train():
     save_model(net)
 
 def test(image):
-    dp.load_test_image(image)
+    img_tensor = dp.load_test_image(image)
 
 
 if __name__ == "__main__":

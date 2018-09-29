@@ -1,3 +1,5 @@
+import fire
+import data_processing as dp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -32,7 +34,7 @@ def set_optimization(model):
     epochs = 1
     return criterion, optimizer, epochs
 
-def train(model, trainloader, criterion, optimizer, epoch):
+def train_model(model, trainloader, criterion, optimizer, epoch):
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
         # get the inputs
@@ -56,7 +58,7 @@ def train(model, trainloader, criterion, optimizer, epoch):
 
     print('Finished Training')
 
-def test(model, testloader, epoch):
+def test_model(model, testloader, epoch):
     correct, total = 0, 0
     with torch.no_grad():
         for data in testloader:
@@ -68,3 +70,46 @@ def test(model, testloader, epoch):
 
     print('Accuracy of the network on the 10000 test images: %d %%' % (
             100 * correct / total))
+
+'''
+    Saves the model to the directory.
+'''
+def save_model(net):
+    torch.save(net.state_dict(), f="TrainedModels/" + 
+                                       "model.model")
+    print("Model saved successfully.")
+
+'''
+    Trains network using GPU, if available. Otherwise uses CPU.
+'''
+def set_device(net):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Training on: %s\n" %device)
+    # .double() will make sure that  MLP will process tensor
+    # of type torch.DoubleTensor:
+    return net.to(device), device
+
+def train():
+    # This loads the dataset and partitions it into batches:
+    trainset, testset = dp.load_cifar10()
+    trainloader, testloader = dp.batch_data(trainset, testset)
+    # Loads the model and the training/testing functions:
+    net = SoftmaxClassifier()
+    net, device = set_device(net)
+    criterion, optimizer, epochs = set_optimization(net)
+    
+    # Print the train and test accuracy after every epoch:
+    for epoch in range(epochs):
+        train_model(net, trainloader, criterion, optimizer, epoch)
+        test_model(net, testloader, epoch)
+    
+    # Save the model:
+    save_model(net)
+
+def test(image):
+    pass
+
+
+if __name__ == "__main__":
+    fire.Fire()
+

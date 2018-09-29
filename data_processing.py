@@ -1,18 +1,36 @@
+import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from PIL import Image
 import matplotlib.pyplot as plt
-import numpy as np
+# Image class comes from a package called pillow 
+# which is the format for passing images into torchvision
+
+def chained_transform():
+    preprocess = transforms.Compose([transforms.Resize(32, 32),
+                                     transforms.ToTensor(),
+                                     transforms.Normalize((0.5, 0.5, 0.5), 
+                                     (0.5, 0.5, 0.5))])
+    return preprocess
 
 def load_cifar10():
-    transform = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Normalize((0.5, 0.5, 0.5), 
-                                                         (0.5, 0.5, 0.5))])
+    preprocess = chained_transform()
     trainset = torchvision.datasets.CIFAR10(root='./CIFAR10', train=True,
-                                            download=True, transform=transform)
+                                            download=True, 
+                                            transform=preprocess)
     testset = torchvision.datasets.CIFAR10(root='./CIFAR10', train=False,
-                                           download=True, transform=transform)
+                                           download=True, 
+                                           transform=preprocess)
     return trainset, testset
+
+def load_test_image(image):
+    preprocess = chained_transform()
+    image = Image.open(image)
+    img_tensor = preprocess(image)
+    print(img_tensor)
+    print(img_tensor.shape)
+    return img_tensor
 
 def batch_data(trainset, testset, batch_size=4):
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,

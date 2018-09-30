@@ -5,9 +5,9 @@ import torchvision.transforms as transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 # Image class comes from a package called pillow 
-# which is the format for passing images into torchvision
+# PIL used as the format for passing images into torchvision
 
-def chained_transform():
+def chained_transformation():
     preprocess = transforms.Compose([transforms.Resize((32, 32)),
                                      transforms.ToTensor(),
                                      transforms.Normalize((0.5, 0.5, 0.5), 
@@ -15,7 +15,7 @@ def chained_transform():
     return preprocess
 
 def load_cifar10():
-    preprocess = chained_transform()
+    preprocess = chained_transformation()
     trainset = torchvision.datasets.CIFAR10(root='./CIFAR10', train=True,
                                             download=True, 
                                             transform=preprocess)
@@ -24,9 +24,10 @@ def load_cifar10():
                                            transform=preprocess)
     return trainset, testset
 
-def load_test_image(image):
-    preprocess = chained_transform()
-    image = Image.open(image)
+def load_test_image(image_path):
+    image = Image.open(image_path)
+    image.show()
+    preprocess = chained_transformation()
     img_tensor = preprocess(image)
     return img_tensor
 
@@ -59,6 +60,7 @@ def main():
     classes = ('plane', 'car', 'bird', 'cat',
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     test_loading(trainloader, classes)
+
 
 if __name__ == '__main__':
     main()

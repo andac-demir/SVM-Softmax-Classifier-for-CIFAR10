@@ -1,4 +1,5 @@
 import fire
+import numpy as np
 import data_processing as dp
 import torch
 import torch.nn as nn
@@ -6,7 +7,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
 import matplotlib.pyplot as plt
-import numpy as np
 
 class SoftmaxClassifier(nn.Module):
     def __init__(self):
@@ -31,7 +31,7 @@ class SoftmaxClassifier(nn.Module):
 def set_optimization(model):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    epochs = 1
+    epochs = 5
     return criterion, optimizer, epochs
 
 def train_model(model, trainloader, criterion, optimizer, epoch):
@@ -52,11 +52,9 @@ def train_model(model, trainloader, criterion, optimizer, epoch):
         # print statistics
         running_loss += loss.item()
         if i % 2000 == 1999:    # print every 2000 mini-batches
-            print('[%d, %5d] loss: %.3f' %
-                    (epoch + 1, i + 1, running_loss / 2000))
+            print('[epoch: %d, batch: %5d] loss: %.3f' %
+                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
-
-    print('Finished Training')
 
 def test_model(model, testloader, epoch):
     correct, total = 0, 0
@@ -68,16 +66,28 @@ def test_model(model, testloader, epoch):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    print('Accuracy of the network on the 10000 test images: %d %%' % (
-            100 * correct / total))
+    print('Accuracy of the network on the 10000 test images: %d %%\n' % (
+          100 * correct / total))
 
 '''
-    Saves the model to the directory.
+    Saves the model to the directory TrainedModels.
 '''
 def save_model(net):
-    torch.save(net.state_dict(), f="TrainedModels/" + 
-                                       "model.model")
+    torch.save(net.state_dict(), f="TrainedModels/model.model")
     print("Model saved successfully.")
+
+'''
+    Loads the pretrained network. 
+'''
+def load_model(net):
+    try:
+        net.load_state_dict(torch.load("TrainedModels/model.model"))
+    except RuntimeError:
+        print("Runtime Error!")
+        print(("Saved model must have the same network architecture with"
+               " the CopyModel.\nRe-train and save again or fix the" 
+               " architecture of CopyModel."))
+        exit(1) # stop execution with error
 
 '''
     Trains network using GPU, if available. Otherwise uses CPU.
@@ -95,19 +105,27 @@ def train():
     trainloader, testloader = dp.batch_data(trainset, testset)
     # Loads the model and the training/testing functions:
     net = SoftmaxClassifier()
-    net, device = set_device(net)
+    net, _ = set_device(net)
     criterion, optimizer, epochs = set_optimization(net)
     
     # Print the train and test accuracy after every epoch:
     for epoch in range(epochs):
         train_model(net, trainloader, criterion, optimizer, epoch)
         test_model(net, testloader, epoch)
-    
+
+    print('Finished Training')   
     # Save the model:
     save_model(net)
 
-def test(image):
-    img_tensor = dp.load_test_image(image)
+def test(image_path):
+    classes = ('plane', 'car', 'bird', 'cat',
+               'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    img_tensor = dp.load_test_image(image_path).unsqueeze(0)
+    net = SoftmaxClassifier()
+    load_model(net)
+    outputs = net(img_tensor)
+    _, predicted = torch.max(outputs.data, 1)
+    print("Predicted: %s" %classes[predicted[0]])
 
 
 if __name__ == "__main__":

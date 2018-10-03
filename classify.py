@@ -9,6 +9,10 @@ import torch.optim as optim
 import torchvision
 import matplotlib.pyplot as plt
 
+'''
+    Defines the network architecture, activations and regularizers.
+    Forward prop.
+'''
 class SoftmaxClassifier(nn.Module):
     def __init__(self):
         super(SoftmaxClassifier, self).__init__()
@@ -24,6 +28,10 @@ class SoftmaxClassifier(nn.Module):
         return x
 
 
+'''
+    Sets the loss and optimization criterion and number of epochs.
+    They were chosen heuristically.
+'''
 def set_optimization(model):
     # This criterion combines nn.LogSoftmax() and nn.NLLLoss() 
     # in one single clas
@@ -32,6 +40,10 @@ def set_optimization(model):
     epochs = 5
     return criterion, optimizer, epochs
 
+'''
+    forward + backward prop for 1 epoch
+    prints the loss for every minibatch (2000 images)
+'''
 def train_model(model, trainloader, criterion, optimizer, epoch):
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
@@ -54,6 +66,10 @@ def train_model(model, trainloader, criterion, optimizer, epoch):
                    (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
 
+'''
+    Tests the model accuracy over the test data in one epoch
+    Prints the average loss
+'''
 def test_model(model, testloader, epoch):
     correct, total = 0, 0
     with torch.no_grad():
@@ -68,10 +84,10 @@ def test_model(model, testloader, epoch):
           100 * correct / total))
 
 '''
-    Saves the model to the directory TrainedModels.
+    Saves the model to the directory Model
 '''
 def save_model(net):
-    torch.save(net.state_dict(), f="TrainedModels/model.model")
+    torch.save(net.state_dict(), f="Model/model.model")
     print("Model saved successfully.")
 
 '''
@@ -79,7 +95,7 @@ def save_model(net):
 '''
 def load_model(net):
     try:
-        net.load_state_dict(torch.load("TrainedModels/model.model"))
+        net.load_state_dict(torch.load("Model/model.model"))
     except RuntimeError:
         print("Runtime Error!")
         print(("Saved model must have the same network architecture with"
@@ -97,6 +113,9 @@ def set_device(net):
     # of type torch.DoubleTensor:
     return net.to(device), device
 
+'''
+    Applies the train_model and test_model functions at each epoch
+'''
 def train():
     # This loads the dataset and partitions it into batches:
     trainset, testset = dp.load_cifar10()
@@ -115,6 +134,9 @@ def train():
     # Save the model:
     save_model(net)
 
+'''
+    Classifies the image whose path entered on the terminal.
+'''
 def test(image_path):
     classes = ('plane', 'car', 'bird', 'cat',
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck')

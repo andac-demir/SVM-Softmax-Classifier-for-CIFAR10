@@ -16,4 +16,4 @@ python classify.py test xxx.png
 ```
 
 
-*Note: Advances in Deep Learning Class HW. Practice a neural network softmax classifier. As many dense layers as possible can be added but convolutional layers were not allowed.*
+*Note: Advances in Deep Learning Class(EECE7398) HW: Practice a neural network softmax classifier. As many dense layers as possible can be added but convolutional layers were not allowed.*
